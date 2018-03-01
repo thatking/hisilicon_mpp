@@ -1,0 +1,1 @@
+cmd_/home/pub/temp/platform_ipc/mpp/extdrv/hi3518e/adv7179/adv_7179.o := arm-hisiv300-linux-ld -EL    -r -o /home/pub/temp/platform_ipc/mpp/extdrv/hi3518e/adv7179/adv_7179.o /home/pub/temp/platform_ipc/mpp/extdrv/hi3518e/adv7179/adv7179.o 
