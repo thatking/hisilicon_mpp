@@ -1,0 +1,73 @@
+
+ifeq ($(HIARCH), $(filter $(HIARCH), hi3519 hi3516cv300 hi3519v101 hi3516av200 hi3559))
+    KERNEL_NAME="linux-3.18.y"
+    ifneq ($(CUSTOMER_VERSION), COMMON)
+        KERNEL_NAME="linux-4.9"
+    endif
+else
+    KERNEL_NAME="linux-3.4.y"
+endif
+
+##############################################################################
+
+# use C01 to indicate uclibc, C02 to  indicate glibc, C00 to indicate FPGA.
+ifneq ($(CUSTOMER_VERSION), COMMON)
+    export CVER?=.C$(DBG_FLAG)4
+else
+    ifeq ($(LIBC),glibc)
+        export CVER?=.C$(DBG_FLAG)2
+    else ifeq ($(FPGA), y)
+        export CVER?=.C$(DBG_FLAG)0
+    else
+        export CVER?=.C$(DBG_FLAG)1
+    endif
+endif
+
+##############################################################################
+
+# Allocated the kernel position
+ifeq ($(MPP_BUILD), y)
+    ifeq ($(HIARCH),$(filter $(HIARCH), hi3519 hi3519v101 hi3516av200))
+        export KERNEL_ROOT?=$(HIWORK_PATH)/osdrv$(HIARCH)$(CVER)/$(CPU_TYPE)/opensource/kernel/$(KERNEL_NAME)		
+    else ifeq ($(HIARCH),$(filter $(HIARCH), hi3559))
+		export KERNEL_ROOT?=$(SDK_PATH)/osdrv/$(HIARCH)/dual/opensource/linux/$(KERNEL_NAME)	
+	else
+        export KERNEL_ROOT?=$(HIWORK_PATH)/osdrv$(HIARCH)$(CVER)/opensource/kernel/$(KERNEL_NAME)
+    endif	
+else
+    export KERNEL_ROOT?=$(SDK_PATH)/osdrv/opensource/kernel/$(KERNEL_NAME)
+endif
+
+##############################################################################
+# Define cross compiler
+ifeq ($(LIBC),glibc)
+    ifneq ($(CUSTOMER_VERSION), COMMON)
+        export CROSS_COMPILE?=arm-poky-linux-gnueabi-
+        export CROSS?=arm-poky-linux-gnueabi-
+    else
+        export CROSS_COMPILE?=arm-hisiv600-linux-
+        export CROSS?=arm-hisiv600-linux-
+    endif
+else
+        export CROSS_COMPILE?=arm-hisiv500-linux-
+        export CROSS?=arm-hisiv500-linux-
+endif
+
+export CC:=$(CROSS)gcc
+export AR:=$(CROSS)ar
+
+export REL_INC := $(REL_DIR)/include
+export REL_LIB := $(REL_DIR)/lib
+export REL_KO  := $(REL_DIR)/ko
+export REL_OBJ := $(REL_DIR)/obj
+export REL_INI := $(REL_DIR)/init
+
+
+#ifeq ($(HIARCH), $(filter $(HIARCH), hi3519 hi3516cv300 hi3519v101 hi3516av200))
+    MPP_CFLAGS += -Wno-date-time
+    DRV_CFLAGS += -Wno-date-time
+#endif
+
+LIBS_CFLAGS += -ldl
+LIBS_LD_CFLAGS += -ldl
+

@@ -1,0 +1,16 @@
+TARGET := $(OBJ:%.o=%)
+
+.PHONY : clean all $(SNS)
+
+all: $(TARGET)
+
+$(TARGET):%:%.o 
+	$(CC) $(CFLAGS)  -o $@ $^ $(LIBS) $(AUDIO_LIBA) 
+	@rm *.o
+clean:
+	@rm -f $(TARGET)
+	@rm -f $(OBJ)
+ifneq ($(SNS), clean)
+$(SNS): all
+	@echo
+endif
