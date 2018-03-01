@@ -1,0 +1,2 @@
+/home/pub/temp/platform_ipc/mpp/component/isp/isp/firmware/drv/hi3516a_isp.ko
+/home/pub/temp/platform_ipc/mpp/component/isp/isp/firmware/drv/isp.o /home/pub/temp/platform_ipc/mpp/component/isp/isp/firmware/drv/mkp_acm.o /home/pub/temp/platform_ipc/mpp/component/isp/isp/firmware/drv/isp_acm_lut.o /home/pub/temp/platform_ipc/mpp/component/isp/isp/firmware/drv/../vreg/hi_drv_vreg.o /home/pub/temp/platform_ipc/mpp/component/isp/isp/firmware/drv/../vreg/hi_vreg.o /home/pub/temp/platform_ipc/mpp/component/isp/isp/firmware/drv/isp_st.o
