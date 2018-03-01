@@ -1,0 +1,195 @@
+#!/bin/sh
+# Useage: ./load [ -r|-i|-a ][type]
+#         -r : rmmod all modules
+#         -i : insmod all modules
+#    default : rmmod all moules and then insmod them
+#        type: 16d1,8960h,2hd,4720p,1hd7d1
+#
+
+SDK_TYPE=16d1
+
+if [ $# -ge 2 ]; then
+    SDK_TYPE=$2
+fi
+
+
+if [ $SDK_TYPE = "16d1" ]; then
+    echo "SDK_TYPE type is $SDK_TYPE"
+elif [ $SDK_TYPE = "8960h" ]; then
+    echo "SDK_TYPE type is $SDK_TYPE" 
+elif [ $SDK_TYPE = "2hd" ]; then
+    echo "SDK_TYPE type is $SDK_TYPE" 
+elif [ $SDK_TYPE = "4720p" ]; then
+    echo "SDK_TYPE type is $SDK_TYPE" 
+elif [ $SDK_TYPE = "1hd7d1" ]; then
+    echo "SDK_TYPE type is $SDK_TYPE" 
+else
+    SDK_TYPE=16d1
+    echo "SDK_TYPE type is $SDK_TYPE"
+fi
+
+report_error()
+{
+    echo "******* Error!! Shell exit for error *****"
+    exit 1
+}
+
+insert_audio()
+{
+    insmod hidmac.ko
+    insmod extdrv/tlv_320aic31.ko > /dev/null
+    #insmod extdrv/acodec.ko
+    insmod hi3520A_sio.ko
+    insmod hi3520A_ai.ko
+    insmod hi3520A_ao.ko
+    insmod hi3520A_aenc.ko
+    insmod hi3520A_adec.ko
+}
+
+remove_audio()
+{
+    rmmod hi3520A_adec
+    rmmod hi3520A_aenc
+    rmmod hi3520A_ao
+    rmmod hi3520A_ai
+    rmmod hi3520A_sio
+    #rmmod acodec
+    rmmod tlv_320aic31
+    rmmod hidmac
+}
+
+insert_ko()
+{
+   if [ $SDK_TYPE = "16d1" ]; then
+       sh ./pinmux_hi3520A_16D1.sh > /dev/null
+       himm 0x20110168  0x03ff2
+   fi
+   
+   if [ $SDK_TYPE = "8960h" ]; then
+       sh ./pinmux_hi3520A_16D1.sh > /dev/null
+   fi
+   
+   if [ $SDK_TYPE = "2hd" ]; then
+       sh ./pinmux_hi3520A_2X1080P.sh > /dev/null
+   fi
+   
+   if [ $SDK_TYPE = "4720p" ]; then
+       sh ./pinmux_hi3520A_4X720P.sh > /dev/null
+   fi
+   
+    if [ $SDK_TYPE = "1hd7d1" ]; then
+        sh ./pinmux_hi3520A_1XHD_7XD1.sh > /dev/null
+    fi
+
+    sh ./clkcfg_hi3520A.sh > /dev/null
+    #sh ./pinmux_16D1_LCD_hi3520A.sh > /dev/null
+    
+    sh ./sysctl_hi3520A.sh > /dev/null  #The ddr priority must be set before inserting all modules, otherwise vou will be low bandwidth(or flicker) when the machine is starting up.
+
+    insmod mmz.ko mmz=anonymous,0,0x84000000,186M:jpeg,0,0x8fa00000,5M anony=1 || report_error
+    insmod hi3520A_base.ko
+    insmod hi3520A_sys.ko
+    insmod hi3520A_tde.ko g_u32TdeTmpBufW=0 g_u32TdeTmpBufH=0
+    insmod hi3520A_dsu.ko
+    insmod hi3520A_venc.ko
+    insmod hi3520A_group.ko
+    insmod hi3520A_chnl.ko
+    insmod hi3520A_h264e.ko
+    insmod hi3520A_rc.ko
+    insmod hi3520A_jpege.ko
+    insmod hi3520A_viu.ko
+    insmod hi3520A_vou.ko
+    insmod hi3520A_vpss.ko
+    insmod hi3520A_ive.ko
+    insmod hi3520A_vda.ko
+    insmod hi3520A_region.ko
+    insmod vcmp.ko
+    insmod hifb.ko video="hifb:vram0_size:8100,vram1_size:1620,vram2_size:1620,vram3_size:32" softcursor="off" u32VcmpBufNum=2
+    insmod hi3520A_vdec.ko
+    insmod hi3520A_vfmw.ko
+    insmod hi3520A_hdmi.ko
+    insmod jpeg.ko
+    insmod extdrv/gpioi2c.ko
+    
+	if [ $SDK_TYPE = "8960h" ]; then
+	    insmod extdrv/tw2960.ko
+	elif [ $SDK_TYPE = "2hd" ]; then
+	    insmod extdrv/ssp.ko
+	elif [ $SDK_TYPE = "4720p" ]; then
+	    insmod extdrv/ssp.ko
+	elif [ $SDK_TYPE = "1hd7d1" ]; then
+	    insmod extdrv/tw2865.ko
+		insmod extdrv/ssp.ko
+	else
+	    insmod extdrv/tw2865.ko
+	fi
+
+    #insmod extdrv/sil9024.ko norm=1;  #480I60_4X3
+    #insmod extdrv/sil9024.ko norm=2;  #576I50_4X3
+    #insmod extdrv/sil9024.ko norm=3;  #480P60_4X3
+    #insmod extdrv/sil9024.ko norm=4;  #576P50_4X3
+    #insmod extdrv/sil9024.ko norm=5;  #720P60
+    #insmod extdrv/sil9024.ko norm=6;   #720P50
+    #insmod extdrv/sil9024.ko norm=7;  #1080I60
+    #insmod extdrv/sil9024.ko norm=8;  #1080I50
+    insmod extdrv/sil9024.ko norm=9;  #1080P60
+    #insmod extdrv/sil9024.ko norm=10;  #1080P50
+    #insmod extdrv/sil9024.ko norm=11;  #1080P25
+    #insmod extdrv/sil9024.ko norm=12;  #1080P30
+
+    #insmod extdrv/adv_7179.ko   #confilct with tw2865(0x56 chip)
+
+    insert_audio
+}
+
+remove_ko()
+{
+    remove_audio
+    rmmod adv_7179.ko
+    rmmod sil9024
+    rmmod ssp
+    rmmod tw2960.ko
+    rmmod tw2865.ko
+    rmmod gpioi2c
+    rmmod hifb
+    rmmod vcmp
+    rmmod hi3520A_region
+    rmmod hi3520A_ive
+    rmmod hi3520A_vda
+    rmmod hi3520A_vpss
+    rmmod hi3520A_vou
+    rmmod hi3520A_viu
+    rmmod jpeg
+    rmmod hi3520A_hdmi.ko
+    rmmod hi3520A_vfmw.ko
+    rmmod hi3520A_vdec.ko   
+    rmmod hi3520A_jpege
+    rmmod hi3520A_rc
+    rmmod hi3520A_h264e
+    #rmmod hi3526_mpeg4e
+    rmmod hi3520A_chnl
+    rmmod hi3520A_group
+    rmmod hi3520A_venc
+    rmmod hi3520A_dsu
+    rmmod hi3520A_tde
+    rmmod hi3520A_sys
+    rmmod hi3520A_base
+    rmmod mmz
+}
+
+# load module.
+if [ "$1" = "-i" ]
+then
+    insert_ko
+fi
+
+if [ "$1" = "-r" ]
+then
+    remove_ko
+fi
+
+if [ $# -eq 0 ] || [ "$1" = "-a" ]
+then
+    remove_ko
+    insert_ko
+fi

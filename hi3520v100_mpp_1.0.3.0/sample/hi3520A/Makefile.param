@@ -1,0 +1,36 @@
+# Hisilicon Hi3516 sample Makefile.param
+
+ifeq ($(PARAM_FILE), )
+     PARAM_FILE:=../../../../mpp/Makefile.param
+     include $(PARAM_FILE)
+endif
+
+INC_FLAGS := -I$(REL_INC)\
+		-I$(SDK_PATH)/mpp/sample/common
+
+INC_FLAGS += -I$(REL_INC) -I$(SDK_PATH)/mpp/$(EXTDRV)/tw2865 -I$(SDK_PATH)/mpp/$(EXTDRV)/tw2960 -I$(SDK_PATH)/mpp/$(EXTDRV)/tlv320aic31
+
+CFLAGS := -Wall -g $(INC_FLAGS) -D$(HIARCH) -DHICHIP=$(HICHIP) -DSENSOR_TYPE=$(SENSOR_TYPE) -D$(HIDBG) -D$(HI_FPGA) -lpthread -lm
+
+include $(PARAM_FILE)
+ifeq ($(HIARCH),hi3531)
+CHIP_TYPE=CHIP_TYPE_hi3531v100
+endif
+ifeq ($(HIARCH),hi3532)
+CHIP_TYPE=CHIP_TYPE_hi3532v100
+endif
+ifeq ($(HIARCH),hi3521)
+CHIP_TYPE=CHIP_TYPE_hi3521v100
+endif
+ifeq ($(HIARCH),hi3520A)
+CHIP_TYPE=CHIP_TYPE_hi3520Av100
+endif
+
+CFLAGS += -D$(CHIP_TYPE)
+ifeq ($(HIARCH),hi3531)
+CFLAGS += -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16
+CXXFlAGS +=-march=armv7-a -mcpu=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16
+endif
+
+COMM_SRC := $(wildcard $(SDK_PATH)/mpp/sample/common/*.c)
+COMM_OBJ := $(COMM_SRC:%.c=%.o)

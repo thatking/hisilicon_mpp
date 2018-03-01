@@ -1,0 +1,60 @@
+Hisilicon Hi35xx 样例程序使用说明
+
+1. 样例程序文件结构说明
+   sample            # MPP 样例程序
+    |-- common       # hi35xx样例程序使用的公用函数
+    |---hi3521       # hi3521/hi3520A样例程序
+    |      |-- vio          # 视频输入/输出功能实现演示
+    |      |-- venc         # 视频编码功能实现演示
+    |      |-- vdec         # 视频节目功能实现演示
+    |      |-- region       # Region功能实现演示
+    |      |-- vda          # VDA (video detect analyse)功能实现演示
+    |      |-- audio        # Audio 功能实现演示
+    |      |-- hifb         # FB (frame buffer) 功能实现演示 
+    |      |-- tde          # TDE (Two Dimensional Engine)功能实现演示 
+    |      |-- ......    
+    |---hi3531       # hi3531/hi3532样例程序       
+           |-- vio          # 视频输入/输出功能实现演示
+           |-- venc         # 视频编码功能实现演示
+           |-- vdec         # 视频节目功能实现演示
+           |-- region       # Region功能实现演示
+           |-- vda          # VDA (video detect analyse)功能实现演示
+           |-- audio        # Audio 功能实现演示
+           |-- hifb         # FB (frame buffer) 功能实现演示 
+           |-- tde          # TDE (Two Dimensional Engine)功能实现演示 
+           |-- pciv         # pciv 功能实现演示 
+           |-- ......    
+
+2. 编译及 Makefile 说明
+
+   1) 编译依赖说明
+   样例程序的编译依赖于MPP头文件(mpp/include)及库文件(mpp/lib)。
+   
+   2) Makefile 说明    
+   在 Sample 的每个业务样例演示模块（如vio、venc等）下均有Makefile，该Makefile引用 sample 目录下的Makefile.param， sample 目录下的 Makefile.param 文件引用 mpp 目录下的 Makefile.param。
+   mpp -- Makefile.param                       # 定义 MPP 编译所需的变量
+    |---sample---Makefile.param                # 定义 sample 编译所需变量
+          |--hi35xx--vio/venc/...---Makefile   # sample 编译脚本
+   在每个业务样例演示模块中执行 make 对该模块进行编译；执行 make clean 清理编译后的可执行文件和目标文件；执行 make cleanstream 清理部分样例程序运行后可能产生的码流文件。
+   在 sample 目录下执行 make 编译各个业务样例演示程序；执行 make clean 清理所有业务样例程序编译后的可执行文件和目标文件；执行 make cleanall 清理各个业务样例程序运行后可能产生的码流文件。
+   
+3. 样例程序运行说明
+   1) 样例程序的运行依赖于媒体驱动，所以，在样例程序执行前，需要执行 mpp/ko 下的 load3531 脚本。
+   2) 注意选择相应的AD驱动
+
+
+4. 修订说明
+   1) 2011-08      创建
+   
+5. 版权声明
+版权所有：深圳市海思半导体有限公司2011。保留一切权利。
+非经本公司书面许可，任何单位和个人不得擅自摘抄、复制本文档内容的部分或全部，并不得以任何形式
+传播。样例程序仅作为使用指导，程序中的所有陈述、信息和建议不构成任何明示或暗示的担保。
+
+-------------------------------------------------------------------------------
+深圳市海思半导体有限公司
+地址： 深圳市龙岗区坂田华为基地华为电气生产中心邮编：518129
+网址： http://www.hisilicon.com
+客户服务电话： +86-755-28788858
+客户服务传真： +86-755-28357515
+客户服务邮箱： support@hisilicon.com

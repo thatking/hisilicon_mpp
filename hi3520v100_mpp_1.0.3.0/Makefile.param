@@ -1,0 +1,140 @@
+# Makefile.param 
+# Only global variable should be defined here.
+# All the variables must be used as "export" and "?=".
+# Otherwise, there will be some errors, when Makefile.param is nested.
+
+# Use this file as the following sample
+# ifeq ($(PARAM_FILE), )
+#     PARAM_FILE:=../Makefile.param
+#     include $(PARAM_FILE)
+# endif
+
+# Define the default OS link directory.
+export HIWORK_PATH?=/hiwork
+
+# One ARCH may have a variety of CHIPs
+
+export HIARCH?=hi3520A
+export HI_CROSS?=uclibc
+
+ifeq ($(HIARCH),hi3531)
+export HICHIP?=0x35310100
+endif
+ifeq ($(HIARCH),hi3532)
+export HICHIP?=0x35320100
+endif
+ifeq ($(HIARCH),hi3521)
+export HICHIP?=0x35210100
+endif
+ifeq ($(HIARCH),hi3520A)
+export HICHIP?=0x3520A100
+endif
+
+
+ifeq ($(HIARCH),hi3531)
+export ARCH_DIR?=hi3531
+endif
+ifeq ($(HIARCH),hi3532)
+export ARCH_DIR?=hi3531
+endif
+ifeq ($(HIARCH),hi3521)
+export ARCH_DIR?=hi3521
+endif
+ifeq ($(HIARCH),hi3520A)
+export ARCH_DIR?=hi3521
+endif
+
+
+# One CHIP may have a variety of customer's version. '.C01' or '.C02' and so on.
+ifeq ($(HI_CROSS),glibc)
+export CVER?= .C02
+else
+export CVER?= .C01
+endif
+
+ifeq ($(HIARCH),hi3531)
+export SPVER?=SPC070
+endif
+
+ifeq ($(HIARCH),hi3532)
+export SPVER?=SPC070
+endif
+
+ifeq ($(HIARCH),hi3521)
+export SPVER?=SPC010
+endif
+
+ifeq ($(HIARCH),hi3520A)
+export SPVER?=SPC010
+endif
+
+# Whether support the debug information. HI_DEBUG or HI_RELEASE 
+export HIDBG?=HI_DEBUG
+#export HIDBG?=HI_RELEASE
+
+# Whether open -g 
+#export HIGDB?=HI_GDB
+export HIGDB?=HI_NOGDB
+
+# FPGA borad or not
+export FPGA?=N
+
+ifeq ($(FPGA),Y)
+#export CVER=.test
+export HI_FPGA:=HI_FPGA
+export EXTDRV:=extdrv_$(HIARCH)_fpga
+else
+export HI_FPGA:=HI_XXXX
+export EXTDRV:=extdrv_$(HIARCH)
+endif
+
+# Get the local SDK_ROOT path or RELEASE_ROOT path by PARAM_FILE.
+# PARAM_FILE is configed at Makefile before include this file
+export PARAM_FILE
+export SDK_PATH?=$(shell cd $(PWD)/`dirname $(PARAM_FILE)`/..; pwd)
+
+# Allocated the linux position
+ifneq ($(shell ls $(HIWORK_PATH)/osdrv$(HIARCH)$(CVER)), )
+    export LINUX_ROOT?=$(HIWORK_PATH)/osdrv$(HIARCH)$(CVER)/kernel/linux-3.0.y
+    export DRV_ROOT?=$(SDK_PATH)/drv
+else
+    export LINUX_ROOT?=$(SDK_PATH)/osdrv/kernel/linux-3.0.y
+    export DRV_ROOT?=$(SDK_PATH)/osdrv/drv
+endif
+
+# Define cross compiler
+# As default, it will be parase from $(LINUX_ROOT)/.hil_config file.
+#export CROSS?=$(shell sed -n s/^CROSS_COMPILE=//p $(LINUX_ROOT)/.hil_config)
+
+ifeq ($(HI_CROSS),glibc)
+export ARCH?=arm
+export CROSS_COMPILE?= arm-hisiv200-linux-
+export CROSS?= arm-hisiv200-linux-
+else
+export ARCH?=arm
+export CROSS_COMPILE?= arm-hisiv100nptl-linux-
+export CROSS?= arm-hisiv100nptl-linux-
+endif
+ifeq ($(CROSS), )
+    $(error CROSS not defined! Please check LINUX_ROOT=$(LINUX_ROOT) )
+endif
+
+export CC:=$(CROSS)gcc
+export AR:=$(CROSS)ar
+
+export AUDIO_PATH?=$(SDK_PATH)/mpp/audiolib/$(CROSS)
+export JPEGD_PATH?=$(SDK_PATH)/mpp/jpegdlib
+
+# Define the object output directory 
+export REL_INC := $(SDK_PATH)/mpp/include_$(HIARCH)
+export REL_LIB := $(SDK_PATH)/mpp/lib_$(HIARCH)
+export REL_KO  := $(SDK_PATH)/mpp/ko_$(HIARCH)
+
+# Define the lib of audio codec
+export AUDIO_LIBA := $(REL_LIB)/libVoiceEngine.a	\
+		$(REL_LIB)/libaec.a	\
+		$(REL_LIB)/libresampler.a	\
+		$(REL_LIB)/libanr.a
+	
+# Define the lib of jpeg codec
+JPEGD_LIBA := $(REL_LIB)/libjpeg.a
